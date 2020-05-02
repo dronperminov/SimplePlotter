@@ -18,10 +18,11 @@
         const WIDTH = 1900
         const HEIGHT = 910
         const CELL_SIZE_X = 90
-        const CELL_SIZE_Y = 180
+        const CELL_SIZE_Y = 90
 
         const X0 = 0
         const Y0 = 0
+        const SCALE = 1
 
         const GRID_COLOR = '#ccc'
         const AXIS_COLOR = '#000'
@@ -40,12 +41,16 @@
 
         ctx = canvas.getContext('2d')
 
-        plotter = new Plotter(WIDTH, HEIGHT, CELL_SIZE_X, CELL_SIZE_Y, X0, Y0, GRID_COLOR, AXIS_COLOR)
+        function Draw(plotter) {
+            console.log(plotter.scale)
+            ctx.clearRect(0, 0, WIDTH, HEIGHT)
+            plotter.DrawGrid(ctx)
+            plotter.DrawAxis(ctx)
+            plotter.PlotFunction(ctx, f1, 0.01, '#f00')
+            plotter.PlotFunction(ctx, f2, 0.01, '#00f')
+        }
 
-        plotter.DrawGrid(ctx)
-        plotter.DrawAxis(ctx)
-        plotter.PlotFunction(ctx, f1, 0.01, '#f00')
-        plotter.PlotFunction(ctx, f2, 0.01, '#00f')
+        plotter = new Plotter(WIDTH, HEIGHT, CELL_SIZE_X, CELL_SIZE_Y, X0, Y0, SCALE, GRID_COLOR, AXIS_COLOR, Draw)
     </script>
 </body>
 </html>
