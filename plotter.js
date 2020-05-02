@@ -21,7 +21,8 @@ function Plotter(ctx, width, height, cell_size_x, cell_size_y, x0, y0, scale, gr
     this.functions = []
 
     let plotter = this
-    document.addEventListener('mousewheel', function(e) { plotter.mouseWheel(e) })
+    document.addEventListener('mousewheel', function(e) { plotter.MouseWheel(e) })
+    document.addEventListener('mousemove', function(e) { plotter.MouseMove(e) })
 }
 
 Plotter.prototype.CalculatePoints = function(x0, y0) {
@@ -122,11 +123,11 @@ Plotter.prototype.Map = function(x, in_min, in_max, out_min, out_max) {
 }
 
 Plotter.prototype.WtoX = function(w) {
-    return Math.round(this.Map(w, 0, this.width, this.xmin / this.scale, this.xmax / this.scale) * 1000) / 1000
+    return Math.round(this.Map(w, 0, this.width, this.xmin / this.scale, this.xmax / this.scale) * 10000) / 10000
 }
 
 Plotter.prototype.HtoY = function(h) {
-    return Math.round(this.Map(h, this.height, 0, this.ymin / this.scale, this.ymax / this.scale) * 1000) / 1000
+    return Math.round(this.Map(h, this.height, 0, this.ymin / this.scale, this.ymax / this.scale) * 10000) / 10000
 }
 
 Plotter.prototype.XtoW = function(x) {
@@ -165,7 +166,31 @@ Plotter.prototype.Plot = function() {
         this.PlotFunction(this.functions[i].f, this.functions[i].color)
 }
 
-Plotter.prototype.mouseWheel = function(e) {
+Plotter.prototype.ShowValues = function(mx, my, x, y) {
+    this.ctx.textBaseline = 'bottom'
+    this.ctx.textAlign = 'left'
+
+    this.ctx.fillStyle = this.axis_color
+    this.ctx.fillText(x + ', ' + y, mx, my)
+
+    this.ctx.beginPath()
+    this.ctx.arc(mx, my, 5, 0, Math.PI * 2)
+    this.ctx.fill()
+
+    for (let i = 0; i < this.functions.length; i++) {
+        let fy = Math.round(this.functions[i].f(x) * 10000) / 10000
+        let iy = this.YtoH(fy)
+
+        this.ctx.fillStyle = this.functions[i].color
+        this.ctx.fillText(x + ', ' + fy, mx, iy)
+
+        this.ctx.beginPath()
+        this.ctx.arc(mx, iy, 5, 0, Math.PI * 2)
+        this.ctx.fill()
+    }
+}
+
+Plotter.prototype.MouseWheel = function(e) {
     let x0 = (this.width / 2 - this.x0) / this.cell_size_x / this.scale
     let y0 = (this.y0 - this.height / 2) / this.cell_size_y / this.scale
 
@@ -186,4 +211,13 @@ Plotter.prototype.mouseWheel = function(e) {
     this.scale *= scale
     this.CalculatePoints((x0 - x) / scale + x, (y0 - y) / scale + y)
     this.Plot()
+    this.ShowValues(e.offsetX, e.offsetY, x, y)
+}
+
+Plotter.prototype.MouseMove = function(e) {
+    let x = this.WtoX(e.offsetX)
+    let y = this.HtoY(e.offsetY)
+
+    this.Plot()
+    this.ShowValues(e.offsetX, e.offsetY, x, y)
 }
