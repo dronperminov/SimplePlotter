@@ -13,5 +13,36 @@
     <canvas id="canvas"></canvas>
 
     <script src="plotter.js"></script>
+
+    <script>
+        const WIDTH = 1900
+        const HEIGHT = 910
+        const CELL_SIZE_X = 90
+        const CELL_SIZE_Y = 180
+
+        const GRID_COLOR = '#ccc'
+        const AXIS_COLOR = '#000'
+
+        canvas = document.getElementById("canvas")
+        canvas.width = WIDTH
+        canvas.height = HEIGHT
+
+        ctx = canvas.getContext('2d')
+
+        plotter = new Plotter(WIDTH, HEIGHT, CELL_SIZE_X, CELL_SIZE_Y, GRID_COLOR, AXIS_COLOR)
+
+        function f1(x) {
+            return Math.sin(x)
+        }
+
+        function f2(x) {
+            return Math.cos(x)
+        }
+
+        plotter.DrawGrid(ctx)
+        plotter.DrawAxis(ctx)
+        plotter.PlotFunction(ctx, f1, -Math.PI * 4, Math.PI * 4, 0.01, '#f00')
+        plotter.PlotFunction(ctx, f2, -Math.PI * 4, Math.PI * 4, 0.01, '#00f')
+    </script>
 </body>
 </html>

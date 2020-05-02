@@ -1,105 +1,92 @@
-const WIDTH = 1900
-const HEIGHT = 910
-const CELL_SIZE_X = 90
-const CELL_SIZE_Y = 180
+function Plotter(width, height, cell_size_x, cell_size_y, grid_color, axis_color) {
+    this.width = width
+    this.height = height
+    this.cell_size_x = cell_size_x
+    this.cell_size_y = cell_size_y
 
-const CELLS_X = (WIDTH / (CELL_SIZE_X * 2))
-const CELLS_Y = (HEIGHT / (CELL_SIZE_Y * 2))
+    this.cells_x = width / (cell_size_x * 2)
+    this.cells_y = height / (cell_size_y * 2)
 
-const X0 = Math.floor(WIDTH / 2)
-const Y0 = Math.floor(HEIGHT / 2)
+    this.x0 = width / 2
+    this.y0 = height / 2
 
-const GRID_COLOR = '#ccc'
-const AXIS_COLOR = '#000'
+    this.grid_color = grid_color
+    this.axis_color = axis_color
+}
 
-canvas = document.getElementById("canvas")
-ctx = canvas.getContext('2d')
-
-canvas.width = WIDTH
-canvas.height = HEIGHT
-
-function DrawLine(ctx, x1, y1, x2, y2) {
+Plotter.prototype.DrawLine = function(ctx, x1, y1, x2, y2) {
     ctx.beginPath()
     ctx.moveTo(x1, y1)
     ctx.lineTo(x2, y2)
     ctx.stroke()
 }
 
-function DrawGrid(ctx) {
-    ctx.strokeStyle = GRID_COLOR
+Plotter.prototype.DrawGrid = function(ctx) {
+    ctx.strokeStyle = this.grid_color
 
-    for (let i = 1; i <= CELLS_Y; i++) {
-        DrawLine(ctx, 0, Y0 + i * CELL_SIZE_Y, WIDTH, Y0 + i * CELL_SIZE_Y)
-        DrawLine(ctx, 0, Y0 - i * CELL_SIZE_Y, WIDTH, Y0 - i * CELL_SIZE_Y)
+    for (let i = 1; i <= this.cells_y; i++) {
+        this.DrawLine(ctx, 0, this.y0 + i * this.cell_size_y, this.width, this.y0 + i * this.cell_size_y)
+        this.DrawLine(ctx, 0, this.y0 - i * this.cell_size_y, this.width, this.y0 - i * this.cell_size_y)
     }
 
-    for (let i = 1; i <= CELLS_X; i++) {
-        DrawLine(ctx, X0 + i * CELL_SIZE_X, 0, X0 + i * CELL_SIZE_X, HEIGHT)
-        DrawLine(ctx, X0 - i * CELL_SIZE_X, 0, X0 - i * CELL_SIZE_X, HEIGHT)
+    for (let i = 1; i <= this.cells_x; i++) {
+        this.DrawLine(ctx, this.x0 + i * this.cell_size_x, 0, this.x0 + i * this.cell_size_x, this.height)
+        this.DrawLine(ctx, this.x0 - i * this.cell_size_x, 0, this.x0 - i * this.cell_size_x, this.height)
     }
 }
 
-function DrawAxis(ctx) {
-    ctx.strokeStyle = AXIS_COLOR
-    ctx.fillStyle = AXIS_COLOR
+Plotter.prototype.DrawAxis = function(ctx) {
+    ctx.strokeStyle = this.axis_color
+    ctx.fillStyle = this.axis_color
     ctx.font = "14px arial";
 
-    DrawLine(ctx, X0, 0, X0, HEIGHT)
-    DrawLine(ctx, 0, Y0, WIDTH, Y0)
+    this.DrawLine(ctx, this.x0, 0, this.x0, this.height)
+    this.DrawLine(ctx, 0, this.y0, this.width, this.y0)
 
     ctx.textBaseline = "top";
     ctx.textAlign = "center";
 
-    for (let i = 1; i < CELLS_X; i++) {
-        DrawLine(ctx, X0 + i * CELL_SIZE_X, Y0 - 4, X0 + i * CELL_SIZE_X, Y0 + 4)
-        DrawLine(ctx, X0 - i * CELL_SIZE_X, Y0 - 4, X0 - i * CELL_SIZE_X, Y0 + 4)
+    for (let i = 1; i < this.cells_x; i++) {
+        this.DrawLine(ctx, this.x0 + i * this.cell_size_x, this.y0 - 4, this.x0 + i * this.cell_size_x, this.y0 + 4)
+        this.DrawLine(ctx, this.x0 - i * this.cell_size_x, this.y0 - 4, this.x0 - i * this.cell_size_x, this.y0 + 4)
 
-        ctx.fillText(i, X0 + i * CELL_SIZE_X, Y0 + 7)
-        ctx.fillText(-i, X0 - i * CELL_SIZE_X, Y0 + 7)
+        ctx.fillText(i, this.x0 + i * this.cell_size_x, this.y0 + 7)
+        ctx.fillText(-i, this.x0 - i * this.cell_size_x, this.y0 + 7)
     }
     
     ctx.textBaseline = "middle";
     ctx.textAlign = "left";
 
-    for (let i = 1; i < CELLS_Y; i++) {
-        DrawLine(ctx, X0 - 4, Y0 + i * CELL_SIZE_Y, X0 + 4, Y0 + i * CELL_SIZE_Y)
-        DrawLine(ctx, X0 - 4, Y0 - i * CELL_SIZE_Y, X0 + 4, Y0 - i * CELL_SIZE_Y)
+    for (let i = 1; i < this.cells_y; i++) {
+        this.DrawLine(ctx, this.x0 - 4, this.y0 + i * this.cell_size_y, this.x0 + 4, this.y0 + i * this.cell_size_y)
+        this.DrawLine(ctx, this.x0 - 4, this.y0 - i * this.cell_size_y, this.x0 + 4, this.y0 - i * this.cell_size_y)
 
-        ctx.fillText(-i, X0 + 7, Y0 + i * CELL_SIZE_Y)
-        ctx.fillText(' ' + i, X0 + 7, Y0 - i * CELL_SIZE_Y)
+        ctx.fillText(-i, this.x0 + 7, this.y0 + i * this.cell_size_y)
+        ctx.fillText(' ' + i, this.x0 + 7, this.y0 - i * this.cell_size_y)
     }
 }
 
-function f1(x) {
-    return Math.sin(x)
-}
-
-function f2(x) {
-    return Math.cos(x)
-}
-
-function Map(x, in_min, in_max, out_min, out_max) {
+Plotter.prototype.Map = function(x, in_min, in_max, out_min, out_max) {
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
-function PlotFunction(ctx, f, xmin, xmax, step, color) {
+Plotter.prototype.XtoW = function(x) {
+    return this.Map(x, -this.cells_x, this.cells_x, 0, this.width - 1)
+}
+
+Plotter.prototype.YtoH = function(y) {
+    return this.Map(y, -this.cells_y, this.cells_y, this.height - 1, 0)
+}
+
+Plotter.prototype.PlotFunction = function(ctx, f, xmin, xmax, step, color) {
     ctx.strokeStyle = color
     ctx.lineWidth = 2
     ctx.beginPath()
-    ctx.moveTo(Map(xmin, -CELLS_X, CELLS_X, 0, WIDTH), Map(f(xmin), -CELLS_Y, CELLS_Y, HEIGHT - 1, 0))
 
-    for (let x = xmin; x <= xmax; x += step) {
-        let y = f(x)
-        let ix = Map(x, -CELLS_X, CELLS_X, 0, WIDTH)
-        let iy = Map(y, -CELLS_Y, CELLS_Y, HEIGHT - 1, 0)
+    ctx.moveTo(this.XtoW(xmin), this.YtoH(f(xmin)))
 
-        ctx.lineTo(ix, iy)
-    }
+    for (let x = xmin; x <= xmax; x += step)
+        ctx.lineTo(this.XtoW(x), this.YtoH(f(x)))
 
     ctx.stroke()
 }
-
-DrawGrid(ctx)
-DrawAxis(ctx)
-PlotFunction(ctx, f1, -Math.PI * 4, Math.PI * 4, 0.01, '#f00')
-PlotFunction(ctx, f2, -Math.PI * 4, Math.PI * 4, 0.01, '#00f')
