@@ -12,13 +12,7 @@ function Plotter(width, height, cell_size_x, cell_size_y, x0, y0, scale, grid_co
     this.cells_x = width / (cell_size_x * 2)
     this.cells_y = height / (cell_size_y * 2)
 
-    this.x0 = width / 2 - x0 * this.cell_size_x
-    this.y0 = height / 2 + y0 * this.cell_size_y
-
-    this.xmin = x0 - this.cells_x
-    this.xmax = x0 + this.cells_x
-    this.ymin = y0 - this.cells_y
-    this.ymax = y0 + this.cells_y
+    this.CalculatePoints(x0, y0)
 
     this.grid_color = grid_color
     this.axis_color = axis_color
@@ -28,6 +22,16 @@ function Plotter(width, height, cell_size_x, cell_size_y, x0, y0, scale, grid_co
 
     let plotter = this
     document.addEventListener('mousewheel', function(e) { plotter.mouseWheel(e) })
+}
+
+Plotter.prototype.CalculatePoints = function(x0, y0) {
+    this.x0 = this.width / 2 - x0 * this.scale * this.cell_size_x
+    this.y0 = this.height / 2 + y0 * this.scale * this.cell_size_y
+
+    this.xmin = x0 * this.scale - this.cells_x
+    this.xmax = x0 * this.scale + this.cells_x
+    this.ymin = y0 * this.scale - this.cells_y
+    this.ymax = y0 * this.scale + this.cells_y
 }
 
 Plotter.prototype.DrawLine = function(ctx, x1, y1, x2, y2) {
@@ -118,43 +122,57 @@ Plotter.prototype.Map = function(x, in_min, in_max, out_min, out_max) {
 }
 
 Plotter.prototype.WtoX = function(w) {
-    return Math.round(this.Map(w, 0, this.width, this.xmin * this.scale, this.xmax * this.scale) * 1000) / 1000
+    return Math.round(this.Map(w, 0, this.width, this.xmin / this.scale, this.xmax / this.scale) * 1000) / 1000
 }
 
 Plotter.prototype.HtoY = function(h) {
-    return Math.round(this.Map(h, this.height, 0, this.ymin * this.scale, this.ymax * this.scale) * 1000) / 1000
+    return Math.round(this.Map(h, this.height, 0, this.ymin / this.scale, this.ymax / this.scale) * 1000) / 1000
 }
 
 Plotter.prototype.XtoW = function(x) {
-    return this.Map(x, this.xmin * this.scale, this.xmax * this.scale, 0, this.width)
+    return this.Map(x, this.xmin / this.scale, this.xmax / this.scale, 0, this.width)
 }
 
 Plotter.prototype.YtoH = function(y) {
-    return this.Map(y, this.ymin * this.scale, this.ymax * this.scale, this.height, 0)
+    return this.Map(y, this.ymin / this.scale, this.ymax / this.scale, this.height, 0)
 }
 
-Plotter.prototype.PlotFunction = function(ctx, f, step, color) {
+Plotter.prototype.PlotFunction = function(ctx, f, color) {
     ctx.strokeStyle = color
     ctx.lineWidth = 2
     ctx.beginPath()
 
-    ctx.moveTo(this.XtoW(this.xmin * this.scale), this.YtoH(f(this.xmin * this.scale)))
+    let step = (this.xmax - this.xmin) / this.scale / this.width
+    ctx.moveTo(this.XtoW(this.xmin / this.scale), this.YtoH(f(this.xmin / this.scale)))
 
-    for (let x = this.xmin * this.scale; x <= this.xmax * this.scale; x += step)
+    for (let x = this.xmin / this.scale; x <= this.xmax / this.scale; x += step)
         ctx.lineTo(this.XtoW(x), this.YtoH(f(x)))
 
     ctx.stroke()
 }
 
 Plotter.prototype.mouseWheel = function(e) {
+    let x0 = (this.width / 2 - this.x0) / this.cell_size_x / this.scale
+    let y0 = (this.y0 - this.height / 2) / this.cell_size_y / this.scale
+
+    let x = this.WtoX(e.offsetX)
+    let y = this.HtoY(e.offsetY)
+
+    let dx = x0 - x
+    let dy = y0 - y
+    let scale
+
     if (e.deltaY > 0) {
-        this.scale *= this.scales[this.scaleIndex]
-        this.scaleIndex = (this.scaleIndex + 1) % this.scales.length
+        this.scaleIndex = (this.scaleIndex + this.scales.length - 1) % this.scales.length
+        scale = 1 / this.scales[this.scaleIndex]
     }
     else {
-        this.scaleIndex = (this.scaleIndex + this.scales.length - 1) % this.scales.length
-        this.scale /= this.scales[this.scaleIndex]
+        scale = this.scales[this.scaleIndex]
+        this.scaleIndex = (this.scaleIndex + 1) % this.scales.length
     }
+
+    this.scale *= scale
+    this.CalculatePoints(dx / scale + x, dy / scale + y)
 
     this.draw(this)
 }
