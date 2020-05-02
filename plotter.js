@@ -46,22 +46,25 @@ Plotter.prototype.DrawGrid = function() {
     this.ctx.strokeStyle = this.grid_color
     this.ctx.lineWidth = 1
 
+    let maxVertical = Math.floor(this.height / this.cell_size_y)
+    let maxHorizontal = Math.floor(this.width / this.cell_size_y)
+
     let top = Math.floor(this.y0 / this.cell_size_y)
     let bottom = Math.floor((this.height - this.y0) / this.cell_size_y)
 
     let left = Math.floor(this.x0 / this.cell_size_x)
     let right = Math.floor((this.width - this.x0) / this.cell_size_x)
 
-    for (let i = 1; i <= top; i++)
+    for (let i = Math.max(1, top - maxVertical); i <= top; i++)
         this.DrawLine(0, this.y0 - i * this.cell_size_y, this.width, this.y0 - i * this.cell_size_y)
 
-    for (let i = 1; i <= bottom; i++)
+    for (let i = Math.max(1, bottom - maxVertical); i <= bottom; i++)
         this.DrawLine(0, this.y0 + i * this.cell_size_y, this.width, this.y0 + i * this.cell_size_y)
 
-    for (let i = 1; i <= right; i++)
+    for (let i = Math.max(1, right - maxHorizontal); i <= right; i++)
         this.DrawLine(this.x0 + i * this.cell_size_x, 0, this.x0 + i * this.cell_size_x, this.height)
 
-    for (let i = 1; i <= left; i++)
+    for (let i = Math.max(1, left - maxHorizontal); i <= left; i++)
         this.DrawLine(this.x0 - i * this.cell_size_x, 0, this.x0 - i * this.cell_size_x, this.height) 
 }
 
@@ -87,15 +90,18 @@ Plotter.prototype.DrawHorizontalValues = function(x0, y0) {
     let left = Math.floor(this.x0 / this.cell_size_x)
     let right = Math.floor((this.width - this.x0) / this.cell_size_x)
     let position = Math.max(7, Math.min(this.height - 14, y0 + 7))
+    let maxHorizontal = Math.floor(this.width / this.cell_size_y)
 
-    for (let i = 1; i <= left; i++) {
-        this.DrawLine(this.x0 - i * this.cell_size_x, y0 - 4, this.x0 - i * this.cell_size_x, y0 + 4)
-        this.ctx.fillText(this.WtoX(this.x0 - i * this.cell_size_x), this.x0 - i * this.cell_size_x, position)
+    for (let i = Math.max(1, left - maxHorizontal); i <= left; i++) {
+        let x = this.x0 - i * this.cell_size_x
+        this.DrawLine(x, y0 - 4, x, y0 + 4)
+        this.ctx.fillText(Math.round(this.WtoX(x) * 10000) / 10000, x, position)
     }
 
-    for (let i = 1; i <= right; i++) {
-        this.DrawLine(this.x0 + i * this.cell_size_x, y0 - 4, this.x0 + i * this.cell_size_x, y0 + 4)
-        this.ctx.fillText(this.WtoX(this.x0 + i * this.cell_size_x), this.x0 + i * this.cell_size_x, position)
+    for (let i = Math.max(1, right - maxHorizontal); i <= right; i++) {
+        let x = this.x0 + i * this.cell_size_x
+        this.DrawLine(x, y0 - 4, x, y0 + 4)
+        this.ctx.fillText(Math.round(this.WtoX(x) * 10000) / 10000, x, position)
     }
 }
 
@@ -106,15 +112,18 @@ Plotter.prototype.DrawVerticalValues = function(x0, y0) {
     let top = Math.floor(this.y0 / this.cell_size_y)
     let bottom = Math.floor((this.height - this.y0) / this.cell_size_y)
     let position = Math.max(7, Math.min(this.width - 14, x0 + 7))
+    let maxVertical = Math.floor(this.height / this.cell_size_y)
 
-    for (let i = 1; i <= top; i++) {
-        this.DrawLine(x0 - 4, this.y0 - i * this.cell_size_y, x0 + 4, this.y0 - i * this.cell_size_y)
-        this.ctx.fillText(this.HtoY(this.y0 - i * this.cell_size_y), position, this.y0 - i * this.cell_size_y)
+    for (let i = Math.max(1, top - maxVertical); i <= top; i++) {
+        let y = this.y0 - i * this.cell_size_y
+        this.DrawLine(x0 - 4, y, x0 + 4, y)
+        this.ctx.fillText(Math.round(this.HtoY(y) * 10000) / 10000, position, y)
     }
 
-    for (let i = 1; i <= bottom; i++) {
-        this.DrawLine(x0 - 4, this.y0 + i * this.cell_size_y, x0 + 4, this.y0 + i * this.cell_size_y)
-        this.ctx.fillText(this.HtoY(this.y0 + i * this.cell_size_y), position, this.y0 + i * this.cell_size_y)
+    for (let i = Math.max(1, bottom - maxVertical); i <= bottom; i++) {
+        let y = this.y0 + i * this.cell_size_y
+        this.DrawLine(x0 - 4, y, x0 + 4, y)
+        this.ctx.fillText(Math.round(this.HtoY(y) * 10000) / 10000, position, y)
     }
 }
 
@@ -123,11 +132,11 @@ Plotter.prototype.Map = function(x, in_min, in_max, out_min, out_max) {
 }
 
 Plotter.prototype.WtoX = function(w) {
-    return Math.round(this.Map(w, 0, this.width, this.xmin / this.scale, this.xmax / this.scale) * 10000) / 10000
+    return this.Map(w, 0, this.width, this.xmin / this.scale, this.xmax / this.scale)
 }
 
 Plotter.prototype.HtoY = function(h) {
-    return Math.round(this.Map(h, this.height, 0, this.ymin / this.scale, this.ymax / this.scale) * 10000) / 10000
+    return this.Map(h, this.height, 0, this.ymin / this.scale, this.ymax / this.scale)
 }
 
 Plotter.prototype.XtoW = function(x) {
@@ -143,12 +152,21 @@ Plotter.prototype.PlotFunction = function(f, color) {
     this.ctx.lineWidth = 2
 
     let step = (this.xmax - this.xmin) / this.scale / this.width
+    let maxValue = Math.max(Math.abs(this.ymax), Math.abs(this.ymin)) / this.scale * 2
 
     this.ctx.beginPath()
     this.ctx.moveTo(this.XtoW(this.xmin / this.scale), this.YtoH(f(this.xmin / this.scale)))
 
-    for (let x = this.xmin / this.scale; x <= this.xmax / this.scale; x += step)
-        this.ctx.lineTo(this.XtoW(x), this.YtoH(f(x)))
+    for (let x = this.xmin / this.scale; x <= this.xmax / this.scale; x += step) {
+        let y = f(x)
+
+        if (Math.abs(y) < maxValue) {
+            this.ctx.lineTo(this.XtoW(x), this.YtoH(y))
+        }
+        else {
+            this.ctx.moveTo(this.XtoW(x), this.YtoH(y))
+        }
+    }
 
     this.ctx.stroke()
 }
